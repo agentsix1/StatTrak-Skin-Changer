@@ -2,6 +2,8 @@ local callbacks_Register, client_AllowListener, client_GetLocalPlayerIndex, clie
 local dir = 'Team-Based-Skins/'
 local allow_temp_file = false
 
+local save_file = "default"
+
 local weapons, _weapons, weapon_keys, skins, _skins, skin_keys, json do
 	local def_cfg
 
@@ -97,7 +99,9 @@ local function list_update(_load, _team)
 		local item = item:GetValue()
 		local skin = (item >= 35 and item <= 53 and skin:GetValue()) or skin:GetValue() + 1
 		local new_i = tostring(item)
-
+		if check_list(weapons[weapon_keys[item + 1]]) then
+			return
+		end
 		local tbl = {
 			weapons[weapon_keys[item + 1]],
 			skins[new_i] and skins[new_i][skin] or '',
@@ -173,13 +177,16 @@ local function config_system(func, _type)
 	local co = gui_Button(group, 'Confirm', function()
 		if _type == 'Load' then
 			func( cfgs[config:GetValue() + 1] )
+			save_file = cfgs[config:GetValue() + 1]
 		else
 			local v = new:GetValue()
 
 			if v:find('[a-zA-Z0-9]') then
 				func( v )
+				save_file = v
 			else
 				func( cfgs[config:GetValue() + 1] )
+				save_file = cfgs[config:GetValue() + 1]
 			end
 		end
 
@@ -221,7 +228,6 @@ local _load = gui_Button(group, 'Load from File',  function() config_system(load
 
 local last_item, last_team
 local function update()
-	print(team_skins["T"][1][1] .. " " .. team_skins["T"][1][2] .. " " .. team_skins["T"][1][3] .. " " .. team_skins["T"][1][4] .. " " .. team_skins["T"][1][5] .. " " .. team_skins["T"][1][6])
 	local val = item:GetValue() + 1
 	
 
@@ -267,40 +273,56 @@ local knife_name = function(a)
 end
 
 function update_kills( kill )
-	for i=1, #kills do
-		local attacker       = kills[i][1]
-		local victim         = kills[i][2]
-		local assister_name  = kills[i][3]
-		local assisted_flash = kills[i][4]
-		local weapon_name    = kills[i][5]
-		local penetrated     = kills[i][6]
-		local headshot       = kills[i][7]
+	for i=1, #kill do
+		local attacker       = kill[i][1]
+		local assister_name  = kill[i][2]
+		local assisted_flash = kill[i][3]
+		local weapon_name    = kill[i][4]
+		local penetrated     = kill[i][5]
+		local headshot       = kill[i][6]
+		local victim         = kill[i][7]
 		
 		for i=1, #team_skins["T"] do
 			local weapon = team_skins["T"][i][1]
 			local skin   = team_skins["T"][i][2]
 			local wear   = team_skins["T"][i][3]
 			local seed   = team_skins["T"][i][4]
-			local kills  = team_skins["T"][i][5]
+			local stat   = team_skins["T"][i][5]
 			
 			if weapon == "weapon_" .. weapon_name then
 				team_skins["T"][i][5] = team_skins["T"][i][5] + 1
+				changer_update("")
+				auto_save()
 			end
 		end
 	end
-	kills = {}
 end
 
-function check_list( weapon ) 
+function check_list( weapon_in ) 
+	for i=1, #team_skins["T"] do
+		local weapon = team_skins["T"][i][1]
+		local skin   = team_skins["T"][i][2]
+		local wear   = team_skins["T"][i][3]
+		local seed   = team_skins["T"][i][4]
+		local kills  = team_skins["T"][i][5]
+		if weapon == weapon_in then
+			return true
+		end
+	end
+	return false
+end
 
+function auto_save()
+	save_to_file(save_file)
 end
 
 local need_update
 local kills = {}
 local function on_event(e)
 	local event = e:GetName()
-	
+	print(event)
 	if event == "round_start" or event == "client_disconnect" or event == "round_announce_match_start" then
+		changer_update("")
 		kills = {}
 		return
 	end
@@ -317,23 +339,19 @@ local function on_event(e)
 		if attacker:GetName() == entities.GetLocalPlayer():GetName() then
 			table.insert(kills, {attacker, assister_name, assisted_flash, weapon_name, penetrated, headshot, victim, globals.CurTime()})
 			print(attacker:GetName() .. " killed " .. victim:GetName() .. " With the " .. weapon_name)
+			update_kills(kills)
+			kills = {}
 		end
 		
 		
 	end
 	
 	if event ~= 'round_prestart' and event ~= 'player_death' then
-		changer_update( cur_team )
+		changer_update("")
 		return
 	end
 
 	local cur_team = TEAMS[entities_GetLocalPlayer():GetTeamNumber() - 1]
-	if event == 'round_prestart' and cur_team then
-		
-			changer_update( cur_team )
-
-		return
-	end
 
 	local local_player = client_GetLocalPlayerIndex()
 	if client_GetPlayerIndexByUserID(e:GetInt('attacker')) ~= local_player or client_GetPlayerIndexByUserID(e:GetInt('userid')) == local_player then
