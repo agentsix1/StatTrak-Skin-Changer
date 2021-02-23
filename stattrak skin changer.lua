@@ -16,7 +16,7 @@
 -- This is a product of the G&A Development Team
 --
 local callbacks_Register, client_AllowListener, client_GetLocalPlayerIndex, client_GetPlayerIndexByUserID, draw_GetScreenSize, entities_GetLocalPlayer, file_Enumerate, file_Read, file_Write, gui_Button, gui_Combobox, gui_Command, gui_Editbox, gui_Groupbox, gui_Listbox, gui_Reference, gui_Slider, gui_Tab, gui_Window, http_Get, loadstring, string_format, table_insert, table_remove, table_sort, unpack, tostring, tonumber = callbacks.Register, client.AllowListener, client.GetLocalPlayerIndex, client.GetPlayerIndexByUserID, draw.GetScreenSize, entities.GetLocalPlayer, file.Enumerate, file.Read, file.Write, gui.Button, gui.Combobox, gui.Command, gui.Editbox, gui.Groupbox, gui.Listbox, gui.Reference, gui.Slider, gui.Tab, gui.Window, http.Get, loadstring, string.format, table.insert, table.remove, table.sort, unpack, tostring, tonumber
-local dir = 'Team-Based-Skins/'
+local dir = 'StatTrak-Skin-Changer/'
 local allow_temp_file = false
 
 local save_file = "default"
@@ -37,7 +37,7 @@ local weapons, _weapons, weapon_keys, skins, _skins, skin_keys, json do
 	local n = {'json.txt', 'skins.txt'}
 
 	for i=1, 2 do
-		n[i+2] = http.Get('https://raw.githubusercontent.com/Zack2kl/'..dir..'master/'..n[i])
+		n[i+2] = http.Get('https://raw.githubusercontent.com/Zack2kl/Team-Based-Skins/master/'..n[i])
 	end
 
 	json = loadstring(n[3])()
@@ -47,7 +47,7 @@ local weapons, _weapons, weapon_keys, skins, _skins, skin_keys, json do
 end
 
 local MENU = gui_Reference('MENU')
-local tab = gui_Tab(gui_Reference('Visuals'), 'team_based', 'Team Based Skins')
+local tab = gui_Tab(gui_Reference('Visuals'), 'team_based', 'StatTrak Skin Changer')
 local group = gui_Groupbox(tab, 'Change visual items', 16, 16)
 local TEAMS, team_skins = {'T', 'CT'}, {T = {}, CT = {}}
 
