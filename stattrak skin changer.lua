@@ -1,3 +1,20 @@
+
+-------------------------------------------
+---------  StatTrak Skin Changer  ---------
+---------  Modified By: Agentsix1 ---------
+---------      Date: 2/1/2021     ---------
+-------------------------------------------
+--------- Tester(s):              ---------
+--------- GameChampCrafted        ---------
+-------------------------------------------
+-------------------------------------------
+--------- Original Code By:          ------
+--------- Zack2kl                    ------
+--------- https://github.com/Zack2kl ------
+-------------------------------------------
+--
+-- This is a product of the G&A Development Team
+--
 local callbacks_Register, client_AllowListener, client_GetLocalPlayerIndex, client_GetPlayerIndexByUserID, draw_GetScreenSize, entities_GetLocalPlayer, file_Enumerate, file_Read, file_Write, gui_Button, gui_Combobox, gui_Command, gui_Editbox, gui_Groupbox, gui_Listbox, gui_Reference, gui_Slider, gui_Tab, gui_Window, http_Get, loadstring, string_format, table_insert, table_remove, table_sort, unpack, tostring, tonumber = callbacks.Register, client.AllowListener, client.GetLocalPlayerIndex, client.GetPlayerIndexByUserID, draw.GetScreenSize, entities.GetLocalPlayer, file.Enumerate, file.Read, file.Write, gui.Button, gui.Combobox, gui.Command, gui.Editbox, gui.Groupbox, gui.Listbox, gui.Reference, gui.Slider, gui.Tab, gui.Window, http.Get, loadstring, string.format, table.insert, table.remove, table.sort, unpack, tostring, tonumber
 local dir = 'Team-Based-Skins/'
 local allow_temp_file = false
@@ -320,7 +337,6 @@ local need_update
 local kills = {}
 local function on_event(e)
 	local event = e:GetName()
-	print(event)
 	if event == "round_start" or event == "client_disconnect" or event == "round_announce_match_start" then
 		changer_update("")
 		kills = {}
@@ -338,7 +354,6 @@ local function on_event(e)
 		local headshot = not (e:GetInt("headshot") == 0 and true or false)
 		if attacker:GetName() == entities.GetLocalPlayer():GetName() then
 			table.insert(kills, {attacker, assister_name, assisted_flash, weapon_name, penetrated, headshot, victim, globals.CurTime()})
-			print(attacker:GetName() .. " killed " .. victim:GetName() .. " With the " .. weapon_name)
 			update_kills(kills)
 			kills = {}
 		end
