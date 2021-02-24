@@ -379,7 +379,6 @@ local function on_event(e)
 		local headshot = not (e:GetInt("headshot") == 0 and true or false)
 		if attacker:GetName() == entities.GetLocalPlayer():GetName() then
 			table.insert(kills, {attacker, assister_name, assisted_flash, weapon_name, penetrated, headshot, victim, globals.CurTime()})
-			print(weapon_name)
 			update_kills(kills)
 			kills = {}
 		end
