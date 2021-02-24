@@ -21,7 +21,7 @@ local allow_temp_file = false
 
 local save_file = "default"
 local default_file = 1
-
+local save_required = false
 local weapons, _weapons, weapon_keys, skins, _skins, skin_keys, json do
 	local def_cfg
 
@@ -101,7 +101,6 @@ local function changer_update(team)
 
 	local tbl = team_skins["T"]
 	for i=1, #tbl do
-		print(team_skins["T"][i][1])
 		gui_Command( string_format('skin.add "%s" "%s" "%s" "%s" "%s" "%s"', unpack(tbl[i])) )
 	end
 end
@@ -131,7 +130,7 @@ local function list_update(_load, _team)
 		}
 
 		table_insert(team_skins[team], tbl)
-		
+		save_required = true
 	end
 
 	for i=1, #team_skins[team] do
@@ -147,8 +146,6 @@ local function list_update(_load, _team)
 			changer_update(team)
 		end
 	end
-	
-	--save_to_file(save_file)
 end
 
 local function remove_from_list(team)
@@ -235,10 +232,6 @@ end
 
 local add = gui_Button(group, 'Add', list_update)
 	add:SetPosX(296) add:SetPosY(304) add:SetWidth(280) add:SetHeight(16)
-function add()
-	list_update(true, 'T')
-	--auto_save()
-end
 
 
 local rem = gui_Button(group, 'Remove Skin', function() remove_from_list('T') end)
@@ -263,6 +256,9 @@ local _load = gui_Button(group, 'Load from File',  function() config_system(load
 
 local last_item, last_team
 local function update()
+	if save_required then
+		--auto_save()
+	end
 	local cfg = gather_configs()
 	if default_config:GetValue()+1 ~= default_file then
 		load_from_file(cfg[default_config:GetValue()+1])
