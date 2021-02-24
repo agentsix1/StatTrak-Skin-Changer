@@ -20,6 +20,7 @@ local dir = 'StatTrak-Skin-Changer/'
 local allow_temp_file = false
 
 local save_file = "default"
+local default_file = 1
 
 local weapons, _weapons, weapon_keys, skins, _skins, skin_keys, json do
 	local def_cfg
@@ -51,7 +52,7 @@ local tab = gui_Tab(gui_Reference('Visuals'), 'team_based', 'StatTrak Skin Chang
 local group = gui_Groupbox(tab, 'Change visual items', 16, 16)
 local TEAMS, team_skins = {'T', 'CT'}, {T = {}, CT = {}}
 
-local list = gui_Listbox(group, 'T.skins', 400)
+local list = gui_Listbox(group, 'T.skins', 420)
 	list:SetWidth(280) list:SetPosY(0)
 local list2 = gui_Listbox(group, 'CT.skins', 194)
 	list2:SetWidth(280) list2:SetPosY(218)
@@ -100,6 +101,7 @@ local function changer_update(team)
 
 	local tbl = team_skins["T"]
 	for i=1, #tbl do
+		print(team_skins["T"][i][1])
 		gui_Command( string_format('skin.add "%s" "%s" "%s" "%s" "%s" "%s"', unpack(tbl[i])) )
 	end
 end
@@ -129,6 +131,7 @@ local function list_update(_load, _team)
 		}
 
 		table_insert(team_skins[team], tbl)
+		
 	end
 
 	for i=1, #team_skins[team] do
@@ -144,6 +147,8 @@ local function list_update(_load, _team)
 			changer_update(team)
 		end
 	end
+	
+	--save_to_file(save_file)
 end
 
 local function remove_from_list(team)
@@ -182,13 +187,15 @@ local function config_system(func, _type)
 	end
 
 	local cfgs = gather_configs()
-	local config = gui_Combobox(group, '', 'Configs', unpack(cfgs)) 
+	local config = gui_Combobox(group, '', 'Configs', unpack(cfgs))
+		config:SetValue(default_file-1)
 	local new = _type == 'Save' and gui_Editbox(group, '', 'New Config')
 
 	if _type == 'Save' then
 		new:SetDescription('Creates new config')
 		window:SetHeight(330)
 		window:SetPosY( (Y * 0.5) - 165 )
+		
 	end
 
 	local co = gui_Button(group, 'Confirm', function()
@@ -228,23 +235,41 @@ end
 
 local add = gui_Button(group, 'Add', list_update)
 	add:SetPosX(296) add:SetPosY(304) add:SetWidth(280) add:SetHeight(16)
+function add()
+	list_update(true, 'T')
+	--auto_save()
+end
+
 
 local rem = gui_Button(group, 'Remove Skin', function() remove_from_list('T') end)
-	rem:SetPosY(416) rem:SetWidth(280) rem:SetHeight(16)
+	rem:SetPosX(296) rem:SetPosY(416) rem:SetWidth(280) rem:SetHeight(16)
 
 local rem2 = gui_Button(group, 'Remove from CT',  function() remove_from_list('CT') end)
 	rem2:SetPosY(416) rem2:SetWidth(280) rem2:SetHeight(16)
 	rem2:SetDisabled(true)
 	rem2:SetInvisible(true)
 
+local default_config = gui_Combobox(group, 'stsc_defaultfile', 'Current File', unpack(gather_configs()))
+	default_config:SetPosX(296) default_config:SetPosY(352) default_config:SetWidth(280)
+	
+
 local save = gui_Button(group, 'Save to File',  function() config_system(save_to_file, 'Save') end)
-	save:SetPosX(360) save:SetPosY(-43) save:SetWidth(100) save:SetHeight(18)
+	save:SetPosX(476) save:SetPosY(-43) save:SetWidth(100) save:SetHeight(18)
 
 local _load = gui_Button(group, 'Load from File',  function() config_system(load_from_file, 'Load') end)
 	_load:SetPosX(476) _load:SetPosY(-43) _load:SetWidth(100) _load:SetHeight(18)
+	_load:SetDisabled(true)
+	_load:SetInvisible(true)
 
 local last_item, last_team
 local function update()
+	local cfg = gather_configs()
+	if default_config:GetValue()+1 ~= default_file then
+		load_from_file(cfg[default_config:GetValue()+1])
+		save_file = cfg[default_config:GetValue()+1]
+		default_file = default_config:GetValue()+1
+				
+	end
 	local val = item:GetValue() + 1
 	
 
@@ -354,6 +379,7 @@ local function on_event(e)
 		local headshot = not (e:GetInt("headshot") == 0 and true or false)
 		if attacker:GetName() == entities.GetLocalPlayer():GetName() then
 			table.insert(kills, {attacker, assister_name, assisted_flash, weapon_name, penetrated, headshot, victim, globals.CurTime()})
+			print(weapon_name)
 			update_kills(kills)
 			kills = {}
 		end
